@@ -1,9 +1,13 @@
-import Link from 'next/link';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 
 export default function Header() {
   return (
-    <header>
-      <Link href='/'>Home</Link>
-    </header>
+    <AppBar position='sticky'>
+      <Toolbar>
+        <Typography variant='h6'>Financial Freedom</Typography>
+      </Toolbar>
+    </AppBar>
   );
 }

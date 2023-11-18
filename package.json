@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/cache": "11.11.0",
+    "@emotion/react": "11.11.1",
+    "@emotion/styled": "11.11.0",
+    "@mui/icons-material": "5.14.18",
+    "@mui/material": "5.14.18",
     "@stytch/nextjs": "14.0.0",
     "@stytch/vanilla-js": "3.2.1",
     "next": "14.0.2",
