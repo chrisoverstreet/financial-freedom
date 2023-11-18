@@ -9,9 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stytch/nextjs": "14.0.0",
+    "@stytch/vanilla-js": "3.2.1",
     "next": "14.0.2",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "stytch": "9.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -20,6 +23,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "prettier": "3.1.0",
+    "prettier-plugin-organize-imports": "3.2.4",
     "typescript": "^5"
   }
 }
