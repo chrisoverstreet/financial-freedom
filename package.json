@@ -18,9 +18,12 @@
     "@stytch/nextjs": "14.0.0",
     "@stytch/vanilla-js": "3.2.1",
     "next": "14.0.2",
+    "plaid": "18.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "stytch": "9.1.0"
+    "react-plaid-link": "3.5.1",
+    "stytch": "9.1.0",
+    "zod": "3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20",

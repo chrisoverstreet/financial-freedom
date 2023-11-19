@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import StytchProvider from '@/components/StytchProvider';
 import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry';
+import { PlaidProvider } from '@/contexts/PlaidContext';
 import type { ReactNode } from 'react';
 
 type Props = {
@@ -18,10 +19,12 @@ export default function RootLayout({ children }: Props) {
       <html lang='en'>
         <body>
           <ThemeRegistry>
-            <Header />
-            <main>
-              <div>{children}</div>
-            </main>
+            <PlaidProvider>
+              <Header />
+              <main>
+                <div>{children}</div>
+              </main>
+            </PlaidProvider>
           </ThemeRegistry>
         </body>
       </html>
