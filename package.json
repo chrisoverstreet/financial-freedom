@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -14,6 +14,7 @@
     "@emotion/styled": "11.11.0",
     "@mui/icons-material": "5.14.18",
     "@mui/material": "5.14.18",
+    "@prisma/client": "5.6.0",
     "@stytch/nextjs": "14.0.0",
     "@stytch/vanilla-js": "3.2.1",
     "next": "14.0.2",
@@ -29,6 +30,7 @@
     "eslint-config-next": "14.0.2",
     "prettier": "3.1.0",
     "prettier-plugin-organize-imports": "3.2.4",
+    "prisma": "5.6.0",
     "typescript": "^5"
   }
 }
