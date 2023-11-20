@@ -1,127 +1,67 @@
 'use client';
 
+import AccountCard from '@/components/AccountCard';
 import Link from '@/components/Link';
-import * as actions from '@/components/actions/plaid-actions';
-import {
-  createLinkToken,
-  createLinkTokenForPayment,
-  getAccounts,
-} from '@/components/actions/plaid-actions';
-import PlaidContext from '@/contexts/PlaidContext';
-import { Stack } from '@mui/material';
+import { getAccounts } from '@/components/actions/get-accounts';
+import getLinkToken from '@/components/actions/get-link-token';
+import { Collapse, List } from '@mui/material';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useStytchUser } from '@stytch/nextjs';
-import { Products } from 'plaid';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { TransitionGroup } from 'react-transition-group';
 
 export default function AccountsPage() {
-  const [accounts, setAccounts] = useState<JSON>();
+  const [accounts, setAccounts] = useState<
+    Awaited<ReturnType<typeof getAccounts>>[0]['Accounts']
+  >([]);
 
-  const { isInitialized, user } = useStytchUser();
+  const router = useRouter();
 
-  const {
-    accessToken,
-    linkSuccess,
-    isItemAccess,
-    isPaymentInitiation,
-    dispatch,
-  } = useContext(PlaidContext);
+  const { user } = useStytchUser();
 
-  console.log({
-    linkSuccess,
-    isItemAccess,
-    isPaymentInitiation,
-  });
+  const [linkToken, setLinkToken] = useState<string>();
 
-  const getInfo = useCallback(async () => {
-    try {
-      const { products } = await actions.getInfo();
-      const paymentInitiation = products.includes(Products.PaymentInitiation);
-      dispatch({
-        type: 'SET_STATE',
-        state: {
-          products,
-          isPaymentInitiation: paymentInitiation,
-        },
-      });
-      return { paymentInitiation };
-    } catch (e) {
-      dispatch({ type: 'SET_STATE', state: { backend: false } });
-      return { paymentInitiation: false };
-    }
-  }, [dispatch]);
-
-  const generateToken = useCallback(
-    async (isPaymentInitiation: boolean, userId: string) => {
-      try {
-        const data = isPaymentInitiation
-          ? await createLinkTokenForPayment(userId)
-          : await createLinkToken(userId);
-
-        console.log({ data });
-
-        if (data) {
-          if (data.error != null) {
-            dispatch({
-              type: 'SET_STATE',
-              state: {
-                linkToken: null,
-                linkTokenError: data.error,
-              },
-            });
-            return;
-          }
-          dispatch({
-            type: 'SET_STATE',
-            state: { linkToken: data.link_token },
-          });
-        }
-        localStorage.setItem('link_token', data.link_token);
-      } catch (e) {
-        dispatch({
-          type: 'SET_STATE',
-          state: { linkToken: null },
-        });
-      }
-    },
-    [dispatch],
+  const getLatestAccounts = useCallback(
+    async () =>
+      getAccounts().then((items) => {
+        setAccounts(items.flatMap((item) => item.Accounts));
+      }),
+    [],
   );
 
   useEffect(() => {
-    if (isInitialized && !!user) {
-      const init = async () => {
-        const { paymentInitiation } = await getInfo();
-
-        if (window.location.href.includes('?oauth_state_id=')) {
-          dispatch({
-            type: 'SET_STATE',
-            state: {
-              linkToken: localStorage.getItem('link_token'),
-            },
-          });
-          return;
-        }
-
-        generateToken(paymentInitiation, user.user_id);
-      };
-      init();
+    if (user && !linkToken) {
+      getLinkToken().then((lt) => setLinkToken(lt ?? undefined));
     }
-  }, [dispatch, generateToken, getInfo, isInitialized, user]);
+  }, [linkToken, user]);
 
   useEffect(() => {
-    if (accessToken) {
-      getAccounts().then(setAccounts).catch(console.error);
-    }
-  }, [accessToken]);
+    getLatestAccounts();
+  }, [getLatestAccounts, router]);
 
   return (
     <Stack gap={2}>
       <Typography variant='h2'>Accounts Page</Typography>
       <Box>
-        <Link />
+        <Link linkToken={linkToken} onSuccess={getLatestAccounts} />
       </Box>
-      {accounts && <pre>{JSON.stringify(accounts, null, `\t`)}</pre>}
+      <List>
+        {!!accounts.length && (
+          <TransitionGroup enter>
+            {accounts.map((account) => (
+              <Collapse key={account.id} mountOnEnter>
+                <AccountCard
+                  account={account}
+                  afterDelete={getLatestAccounts}
+                />
+              </Collapse>
+            ))}
+          </TransitionGroup>
+        )}
+      </List>
     </Stack>
   );
 }

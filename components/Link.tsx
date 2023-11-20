@@ -1,55 +1,33 @@
 'use client';
 
-import * as actions from '@/components/actions/plaid-actions';
-import PlaidContext from '@/contexts/PlaidContext';
+import { plaidLinkOnSuccess } from '@/components/actions/plaid-link-on-success';
 import Button from '@mui/material/Button';
-import { useCallback, useContext, useEffect } from 'react';
+import { useStytchUser } from '@stytch/nextjs';
+import { useCallback, useEffect } from 'react';
 import { PlaidLinkOnSuccess, usePlaidLink } from 'react-plaid-link';
 
-export default function Link() {
-  const { linkToken, isPaymentInitiation, dispatch } = useContext(PlaidContext);
+type Props = {
+  linkToken?: string;
+  onSuccess?: () => unknown;
+};
 
-  console.log({ linkToken, isPaymentInitiation });
+export default function Link({
+  linkToken,
+  onSuccess: onSuccessCallback,
+}: Props) {
+  const { user } = useStytchUser();
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(
-    (public_token) => {
-      const exchangePublicTokenForAccessToken = async () => {
-        try {
-          const { access_token: accessToken, item_id: itemId } =
-            await actions.setAccessToken(public_token);
-
-          dispatch({
-            type: 'SET_STATE',
-            state: {
-              itemId,
-              accessToken,
-              isItemAccess: true,
-            },
-          });
-        } catch (e) {
-          dispatch({
-            type: 'SET_STATE',
-            state: {
-              itemId: 'no item_id retrieved',
-              accessToken: 'no access_token retrieved',
-              isItemAccess: false,
-            },
-          });
-        }
-      };
-
-      if (isPaymentInitiation) {
-        dispatch({ type: 'SET_STATE', state: { isItemAccess: false } });
-      } else {
-        exchangePublicTokenForAccessToken();
-      }
+    async (public_token, metadata) => {
+      await plaidLinkOnSuccess(public_token, metadata);
+      await onSuccessCallback?.();
     },
-    [dispatch, isPaymentInitiation],
+    [onSuccessCallback],
   );
 
   let isOauth = false;
   const config: Parameters<typeof usePlaidLink>[0] = {
-    token: linkToken!,
+    token: linkToken ?? '',
     onSuccess,
   };
 
@@ -70,7 +48,7 @@ export default function Link() {
   }, [isOauth, open, ready]);
 
   return (
-    <Button onClick={() => open()} variant='contained'>
+    <Button disabled={!linkToken} onClick={() => open()} variant='contained'>
       Launch Link
     </Button>
   );

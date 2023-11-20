@@ -17,6 +17,7 @@
     "@prisma/client": "5.6.0",
     "@stytch/nextjs": "14.0.0",
     "@stytch/vanilla-js": "3.2.1",
+    "currency.js": "2.0.4",
     "next": "14.0.2",
     "plaid": "18.0.0",
     "react": "^18",

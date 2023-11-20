@@ -9,13 +9,46 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  stytchId  String   @unique @map(name: "stytch_id")
-  firstName String?  @map(name: "first_name")
-  lastName  String?  @map(name: "last_name")
-  email     String?  @unique
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  id        String      @id @default(cuid())
+  stytchId  String      @unique @map(name: "stytch_id")
+  firstName String?     @map(name: "first_name")
+  lastName  String?     @map(name: "last_name")
+  email     String?     @unique
+  createdAt DateTime    @default(now()) @map(name: "created_at")
+  updatedAt DateTime    @updatedAt @map(name: "updated_at")
+  PlaidItem PlaidItem[]
 
-  @@map(name: "users")
+  @@map(name: "user")
+}
+
+model PlaidItem {
+  id            Int            @id @default(autoincrement())
+  plaidId       String         @unique @map(name: "plaid_id")
+  userId        String         @map(name: "user_id")
+  User          User           @relation(fields: [userId], references: [id])
+  accessToken   String         @map(name: "access_token")
+  institutionId String?
+  Accounts      PlaidAccount[]
+  createdAt     DateTime       @default(now()) @map(name: "created_at")
+  updatedAt     DateTime       @updatedAt @map(name: "updated_at")
+
+  @@map(name: "user_plaid_config")
+}
+
+model PlaidAccount {
+  id               Int       @id @default(autoincrement())
+  plaidId          String    @unique @map(name: "plaid_id")
+  itemId           Int       @map(name: "item_id")
+  Item             PlaidItem @relation(fields: [itemId], references: [id])
+  mask             String?
+  name             String
+  officialName     String?
+  type             String
+  subtype          String?
+  availableBalance Int?
+  currentBalance   Int?
+  ISOCurrencyCode  String?
+  limit            Int?
+  createdAt        DateTime  @default(now()) @map(name: "created_at")
+  updatedAt        DateTime  @updatedAt @map(name: "updated_at")
 }
