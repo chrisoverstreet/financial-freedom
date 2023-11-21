@@ -1,6 +1,7 @@
 'use client';
 
 import { plaidLinkOnSuccess } from '@/components/actions/plaid-link-on-success';
+import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
 import { useStytchUser } from '@stytch/nextjs';
 import { useCallback, useEffect } from 'react';
@@ -49,7 +50,8 @@ export default function Link({
 
   return (
     <Button disabled={!linkToken} onClick={() => open()} variant='contained'>
-      Launch Link
+      <AddIcon sx={{ mr: 1 }} />
+      Add Account
     </Button>
   );
 }

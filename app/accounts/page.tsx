@@ -5,9 +5,7 @@ import Link from '@/components/Link';
 import { getAccounts } from '@/components/actions/get-accounts';
 import getLinkToken from '@/components/actions/get-link-token';
 import { Collapse, List } from '@mui/material';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import { useStytchUser } from '@stytch/nextjs';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -43,12 +41,8 @@ export default function AccountsPage() {
   }, [getLatestAccounts, router]);
 
   return (
-    <Stack gap={2}>
-      <Typography variant='h2'>Accounts Page</Typography>
-      <Box>
-        <Link linkToken={linkToken} onSuccess={getLatestAccounts} />
-      </Box>
-      <List>
+    <Stack gap={4} sx={{ alignItems: 'center', maxWidth: 'md', m: '0 auto' }}>
+      <List sx={{ maxWidth: 'sm', width: '100%' }}>
         {!!accounts.length && (
           <TransitionGroup enter>
             {accounts.map((account) => (
@@ -62,6 +56,7 @@ export default function AccountsPage() {
           </TransitionGroup>
         )}
       </List>
+      <Link linkToken={linkToken} onSuccess={getLatestAccounts} />
     </Stack>
   );
 }
