@@ -22,15 +22,16 @@ model User {
 }
 
 model PlaidItem {
-  id            Int            @id @default(autoincrement())
-  plaidId       String         @unique @map(name: "plaid_id")
-  userId        String         @map(name: "user_id")
-  User          User           @relation(fields: [userId], references: [id])
-  accessToken   String         @map(name: "access_token")
-  institutionId String?
+  id            Int              @id @default(autoincrement())
+  plaidId       String           @unique @map(name: "plaid_id")
+  userId        String           @map(name: "user_id")
+  User          User             @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  accessToken   String           @map(name: "access_token")
+  institutionId Int
+  Institution   PlaidInstitution @relation(fields: [institutionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   Accounts      PlaidAccount[]
-  createdAt     DateTime       @default(now()) @map(name: "created_at")
-  updatedAt     DateTime       @updatedAt @map(name: "updated_at")
+  createdAt     DateTime         @default(now()) @map(name: "created_at")
+  updatedAt     DateTime         @updatedAt @map(name: "updated_at")
 
   @@map(name: "user_plaid_config")
 }
@@ -39,7 +40,7 @@ model PlaidAccount {
   id               Int       @id @default(autoincrement())
   plaidId          String    @unique @map(name: "plaid_id")
   itemId           Int       @map(name: "item_id")
-  Item             PlaidItem @relation(fields: [itemId], references: [id])
+  Item             PlaidItem @relation(fields: [itemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   mask             String?
   name             String
   officialName     String?
@@ -51,4 +52,20 @@ model PlaidAccount {
   limit            Int?
   createdAt        DateTime  @default(now()) @map(name: "created_at")
   updatedAt        DateTime  @updatedAt @map(name: "updated_at")
+
+  @@map(name: "plaid_account")
+}
+
+model PlaidInstitution {
+  id           Int         @id @default(autoincrement())
+  plaidId      String      @unique @map(name: "plaid_id")
+  name         String
+  primaryColor String?
+  url          String?
+  logo         String?
+  createdAt    DateTime    @default(now()) @map(name: "created_at")
+  updatedAt    DateTime    @updatedAt @map(name: "updated_at")
+  PlaidItem    PlaidItem[]
+
+  @@map(name: "plaid_institution")
 }

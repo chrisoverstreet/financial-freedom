@@ -3,6 +3,7 @@
 import { getUserId } from '@/components/actions/get-user-id';
 import plaid from '@/lib/plaid';
 import prisma from '@/lib/prisma';
+import { CountryCode } from 'plaid';
 
 export async function plaidLinkOnSuccess(
   publicToken: string,
@@ -27,6 +28,19 @@ export async function plaidLinkOnSuccess(
     client_id: process.env.PLAID_CLIENT_ID!,
   });
 
+  if (!institutionId) {
+    throw new Error('Failed to find institution');
+  }
+
+  const {
+    data: { institution },
+  } = await plaid.institutionsGetById({
+    institution_id: institutionId,
+    secret: process.env.PLAID_SECRET!,
+    client_id: process.env.PLAID_CLIENT_ID,
+    country_codes: [CountryCode.Us],
+  });
+
   const {
     data: { accounts },
   } = await plaid.accountsGet({
@@ -36,19 +50,41 @@ export async function plaidLinkOnSuccess(
   });
 
   await prisma.$transaction(async (trx) => {
+    const plaidInstitution = await trx.plaidInstitution.upsert({
+      create: {
+        plaidId: institution.institution_id,
+        name: institution.name,
+        logo: institution.logo,
+        primaryColor: institution.primary_color,
+        url: institution.url,
+      },
+      update: {
+        name: institution.name,
+        logo: institution.logo,
+        primaryColor: institution.primary_color,
+        url: institution.url,
+      },
+      where: {
+        plaidId: institution.institution_id,
+      },
+    });
+
     const plaidItem = await trx.plaidItem.upsert({
       create: {
         userId,
         accessToken,
-        institutionId,
         plaidId: itemId,
+        institutionId: plaidInstitution.id,
       },
       update: {
         accessToken,
-        institutionId,
+        institutionId: plaidInstitution.id,
       },
       where: {
         plaidId: itemId,
+        Institution: {
+          plaidId: institution.institution_id,
+        },
       },
       select: {
         id: true,

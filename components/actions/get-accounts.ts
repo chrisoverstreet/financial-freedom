@@ -16,13 +16,25 @@ export async function getAccounts() {
     },
     select: {
       id: true,
-      institutionId: true,
       Accounts: {
         select: {
+          availableBalance: true,
+          currentBalance: true,
           id: true,
           name: true,
-          currentBalance: true,
-          availableBalance: true,
+          Item: {
+            select: {
+              Institution: {
+                select: {
+                  id: true,
+                  logo: true,
+                  name: true,
+                  primaryColor: true,
+                  url: true,
+                },
+              },
+            },
+          },
         },
       },
     },
