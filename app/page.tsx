@@ -1,20 +1,18 @@
-'use client';
+'use server';
 
-import Login from '@/components/Login';
-import { useStytchUser } from '@stytch/nextjs';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import AccountsList from '@/components/AccountsList';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
-  const { isInitialized, user } = useStytchUser();
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isInitialized && user) {
-      router.replace('/profile');
-    }
-  }, [isInitialized, router, user]);
-
-  return <Login />;
+export default async function HomePage() {
+  return (
+    <Container>
+      <Stack>
+        <Suspense>
+          <AccountsList />
+        </Suspense>
+      </Stack>
+    </Container>
+  );
 }

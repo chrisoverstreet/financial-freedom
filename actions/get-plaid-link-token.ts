@@ -1,6 +1,6 @@
 'use server';
 
-import { getUserId } from '@/components/actions/get-user-id';
+import getUserIdOrThrow from '@/actions/get-user-id';
 import plaid from '@/lib/plaid';
 import { CountryCode, Products } from 'plaid';
 import { z } from 'zod';
@@ -13,12 +13,8 @@ const PLAID_COUNTRY_CODES = z
   .parse((process.env.PLAID_COUNTRY_CODES || 'US').split(','));
 const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || '';
 
-export default async function getLinkToken() {
-  const userId = await getUserId();
-
-  if (!userId) {
-    throw new Error('Must be signed in');
-  }
+export default async function getPlaidLinkToken() {
+  const userId = await getUserIdOrThrow();
 
   return plaid
     .linkTokenCreate({
@@ -31,6 +27,5 @@ export default async function getLinkToken() {
       language: 'en',
       redirect_uri: PLAID_REDIRECT_URI || undefined,
     })
-    .then((res) => res.data.link_token)
-    .catch(console.error);
+    .then((res) => res.data.link_token);
 }

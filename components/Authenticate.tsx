@@ -32,7 +32,7 @@ export default function Authenticate() {
     }
 
     if (user) {
-      router.replace('/profile');
+      router.replace('/');
     }
   }, [isInitialized, router, user]);
 

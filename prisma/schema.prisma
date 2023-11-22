@@ -16,56 +16,228 @@ model User {
   email     String?     @unique
   createdAt DateTime    @default(now()) @map(name: "created_at")
   updatedAt DateTime    @updatedAt @map(name: "updated_at")
-  PlaidItem PlaidItem[]
+  Item      PlaidItem[]
 
   @@map(name: "user")
 }
 
-model PlaidItem {
-  id            Int              @id @default(autoincrement())
-  plaidId       String           @unique @map(name: "plaid_id")
-  userId        String           @map(name: "user_id")
-  User          User             @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  accessToken   String           @map(name: "access_token")
-  institutionId Int
-  Institution   PlaidInstitution @relation(fields: [institutionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  Accounts      PlaidAccount[]
-  createdAt     DateTime         @default(now()) @map(name: "created_at")
-  updatedAt     DateTime         @updatedAt @map(name: "updated_at")
+model PlaidBalance {
+  id                     String       @id @default(cuid())
+  accountId              String       @map(name: "account_id")
+  Account                PlaidAccount @relation(fields: [accountId], references: [accountId])
+  available              Float?
+  current                Float?
+  limit                  Float?
+  isoCurrencyCode        String?      @map(name: "iso_currency_code")
+  unofficialCurrencyCode String?      @map(name: "unofficial_currency_code")
+  lastUpdatedDatetime    DateTime?    @map(name: "last_updated_datetime")
 
-  @@map(name: "user_plaid_config")
+  @@map(name: "plaid_balance")
+}
+
+enum PlaidAccountType {
+  investment
+  credit
+  depository
+  loan
+  brokerage
+  other
+
+  @@map(name: "plaid_account_type")
+}
+
+enum PlaidVerificationStatus {
+  automatically_verified
+  pending_automatic_verification
+  pending_manual_verification
+  manually_verified
+  verification_expired
+  verification_failed
+  database_matched
+
+  @@map(name: "plaid_verification_status")
 }
 
 model PlaidAccount {
-  id               Int       @id @default(autoincrement())
-  plaidId          String    @unique @map(name: "plaid_id")
-  itemId           Int       @map(name: "item_id")
-  Item             PlaidItem @relation(fields: [itemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  mask             String?
-  name             String
-  officialName     String?
-  type             String
-  subtype          String?
-  availableBalance Int?
-  currentBalance   Int?
-  ISOCurrencyCode  String?
-  limit            Int?
-  createdAt        DateTime  @default(now()) @map(name: "created_at")
-  updatedAt        DateTime  @updatedAt @map(name: "updated_at")
+  accountId           String                   @id @map(name: "account_id")
+  Balances            PlaidBalance[]
+  mask                String?
+  name                String
+  officialName        String?                  @map(name: "official_name")
+  type                PlaidAccountType
+  subtype             String?
+  verificationStatus  PlaidVerificationStatus? @map(name: "verification_status")
+  persistentAccountId String?                  @map(name: "persistent_account_id")
+  Transactions        PlaidTransaction[]
 
   @@map(name: "plaid_account")
 }
 
+model PlaidItem {
+  itemId                String         @id @map(name: "item_id")
+  institutionId         String?        @map(name: "institution_id")
+  webhook               String?
+  errorId               String?
+  availableProducts     PlaidProduct[] @map(name: "available_products")
+  billedProducts        PlaidProduct[] @map(name: "billed_products")
+  products              PlaidProduct[]
+  consentedProducts     PlaidProduct[] @map(name: "consented_products")
+  consentExpirationTime DateTime?      @map(name: "consent_expiration_time")
+  updateType            String         @map(name: "update_type")
+  User                  User?          @relation(fields: [userId], references: [id])
+  userId                String?        @map(name: "user_id")
+
+  @@map(name: "plaid_item")
+}
+
+enum PlaidProduct {
+  assets
+  auth
+  balance
+  credit_details
+  deposit_switch
+  employment
+  identity
+  identity_match
+  identity_verification
+  income
+  income_verification
+  investments
+  investments_auth
+  liabilities
+  payment_initiation
+  recurring_transactions
+  signal
+  standing_orders
+  statements
+  transactions
+  transfer
+
+  @@map(name: "plaid_product")
+}
+
+enum PlaidCountryCode {
+  US
+  GB
+  ES
+  NL
+  FR
+  IE
+  CA
+  DE
+  IT
+  PL
+  DK
+  NO
+  SE
+  EE
+  LT
+  LV
+  PT
+  BE
+
+  @@map(name: "plaid_country_code")
+}
+
 model PlaidInstitution {
-  id           Int         @id @default(autoincrement())
-  plaidId      String      @unique @map(name: "plaid_id")
-  name         String
-  primaryColor String?
-  url          String?
-  logo         String?
-  createdAt    DateTime    @default(now()) @map(name: "created_at")
-  updatedAt    DateTime    @updatedAt @map(name: "updated_at")
-  PlaidItem    PlaidItem[]
+  institutionId  String             @id @map(name: "institution_id")
+  name           String
+  products       PlaidProduct[]
+  countryCodes   PlaidCountryCode[] @map(name: "country_codes")
+  url            String?
+  primary_color  String?
+  logo           String?
+  routingNumbers String[]           @map(name: "routing_numbers")
+  dtcNumbers     String[]           @map(name: "dtc_numbers")
+  oauth          Boolean
 
   @@map(name: "plaid_institution")
+}
+
+model PlaidCounterparty {
+  id              String           @id @default(cuid())
+  name            String
+  entityId        String?          @map(name: "entity_id")
+  type            String
+  website         String?
+  logoUrl         String?          @map(name: "logo_url")
+  confidenceLevel String?          @map(name: "confidence_level")
+  transactionId   String           @map(name: "transaction_id")
+  Transaction     PlaidTransaction @relation(fields: [transactionId], references: [transactionId])
+
+  @@map(name: "plaid_counterparty")
+}
+
+model PlaidPersonalFinanceCategory {
+  id              String             @id @default(cuid())
+  primary         String
+  detailed        String
+  confidenceLevel String?            @map(name: "confidence_level")
+  Transaction     PlaidTransaction[]
+
+  @@map(name: "plaid_personal_finance_category")
+}
+
+model PlaidLocation {
+  id          String             @id @default(cuid())
+  address     String?
+  city        String?
+  region      String?
+  postalCode  String?            @map(name: "postal_code")
+  country     String?
+  lat         Float?
+  lon         Float?
+  storeNumber String?            @map(name: "store_number")
+  Transaction PlaidTransaction[]
+
+  @@map(name: "plaid_location")
+}
+
+model PlaidPaymentMeta {
+  id               String             @id @default(cuid())
+  referenceNumber  String?            @map(name: "reference_number")
+  ppdId            String?            @map(name: "ppd_id")
+  payee            String?
+  byOrderOf        String?            @map(name: "by_order_of")
+  payer            String?
+  paymentMethod    String?            @map(name: "payment_method")
+  paymentProcessor String?            @map(name: "payment_processor")
+  reason           String?
+  Transaction      PlaidTransaction[]
+
+  @@map(name: "plaid_payment_meta")
+}
+
+model PlaidTransaction {
+  Counterparties                 PlaidCounterparty[]
+  Location                       PlaidLocation                 @relation(fields: [locationId], references: [id])
+  PaymentMeta                    PlaidPaymentMeta              @relation(fields: [paymentMetaId], references: [id])
+  PersonalFinanceCategory        PlaidPersonalFinanceCategory? @relation(fields: [personalFinanceCategoryId], references: [id])
+  Account                        PlaidAccount                  @relation(fields: [accountId], references: [accountId])
+  accountId                      String                        @map(name: "account_id")
+  accountOwner                   String?                       @map(name: "account_owner")
+  amount                         Float
+  authorizedDate                 String?                       @map(name: "authorized_date")
+  authorizedDatetime             DateTime?                     @map(name: "authorized_datetime")
+  checkNumber                    String?                       @map(name: "check_number")
+  date                           String
+  datetime                       DateTime?
+  isoCurrencyCode                String?                       @map(name: "iso_currency_code")
+  locationId                     String                        @map(name: "location_id")
+  logoUrl                        String?                       @map(name: "logo_url")
+  merchantName                   String?                       @map(name: "merchant_name")
+  name                           String
+  originalDescription            String?                       @map(name: "original_description")
+  paymentMetaId                  String                        @map(name: "payment_meta_id")
+  paymentChannel                 String                        @map(name: "payment_channel")
+  pending                        Boolean
+  pendingTransactionId           String?                       @map(name: "pending_transaction_id")
+  personalFinanceCategoryId      String?                       @map(name: "personal_finance_category_id")
+  personalFinanceCategoryIconUrl String                        @map(name: "personal_finance_category_icon_url")
+  transactionCode                String?                       @map(name: "transaction_code")
+  transactionId                  String                        @id @map(name: "transaction_id")
+  unofficialCurrencyCode         String?                       @map(name: "unofficial_currency_code")
+  website                        String?
+
+  @@map(name: "plaid_transaction")
 }
