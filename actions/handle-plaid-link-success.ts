@@ -1,6 +1,6 @@
 'use server';
 
-import getUserIdOrThrow from '@/actions/get-user-id';
+import { authOptions } from '@/lib/next-auth';
 import plaid from '@/lib/plaid';
 import prisma from '@/lib/prisma';
 import {
@@ -8,11 +8,17 @@ import {
   PlaidProduct,
   PlaidVerificationStatus,
 } from '@prisma/client';
+import { getServerSession } from 'next-auth';
 import { CountryCode } from 'plaid';
 import { z } from 'zod';
 
 export async function handlePlaidLinkSuccess(publicToken: string) {
-  const userId = await getUserIdOrThrow();
+  const session = await getServerSession(authOptions);
+
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error('Not signed in');
+  }
 
   const {
     data: { access_token: accessToken, item_id: itemId },
@@ -42,8 +48,8 @@ export async function handlePlaidLinkSuccess(publicToken: string) {
   });
 
   await prisma.$transaction(async (trx) => {
-    const plaidInstitution = await trx.plaidInstitution.create({
-      data: {
+    await trx.plaidInstitution.upsert({
+      create: {
         name: institutionData.institution.name,
         logo: institutionData.institution.logo,
         institutionId: institutionData.institution.institution_id,
@@ -57,9 +63,25 @@ export async function handlePlaidLinkSuccess(publicToken: string) {
         primary_color: institutionData.institution.primary_color,
         routingNumbers: institutionData.institution.routing_numbers,
       },
+      update: {
+        name: institutionData.institution.name,
+        logo: institutionData.institution.logo,
+        countryCodes: institutionData.institution.country_codes,
+        oauth: institutionData.institution.oauth,
+        url: institutionData.institution.url,
+        dtcNumbers: institutionData.institution.dtc_numbers,
+        products: z
+          .array(z.nativeEnum(PlaidProduct))
+          .parse(institutionData.institution.products),
+        primary_color: institutionData.institution.primary_color,
+        routingNumbers: institutionData.institution.routing_numbers,
+      },
+      where: {
+        institutionId: institutionData.institution.institution_id,
+      },
     });
 
-    const plaidItem = await trx.plaidItem.create({
+    await trx.plaidItem.create({
       data: {
         itemId: itemData.item.item_id,
         institutionId: itemData.item.institution_id,
@@ -97,7 +119,12 @@ export async function handlePlaidLinkSuccess(publicToken: string) {
             .nativeEnum(PlaidVerificationStatus)
             .optional()
             .parse(account.verification_status),
-          Balances: {
+          Item: {
+            connect: {
+              itemId: itemData.item.item_id,
+            },
+          },
+          Balance: {
             create: {
               available: account.balances.available,
               current: account.balances.current,

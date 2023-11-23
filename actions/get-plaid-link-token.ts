@@ -1,7 +1,8 @@
 'use server';
 
-import getUserIdOrThrow from '@/actions/get-user-id';
+import { authOptions } from '@/lib/next-auth';
 import plaid from '@/lib/plaid';
+import { getServerSession } from 'next-auth';
 import { CountryCode, Products } from 'plaid';
 import { z } from 'zod';
 
@@ -14,12 +15,16 @@ const PLAID_COUNTRY_CODES = z
 const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || '';
 
 export default async function getPlaidLinkToken() {
-  const userId = await getUserIdOrThrow();
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    throw new Error('Not signed in');
+  }
 
   return plaid
     .linkTokenCreate({
       user: {
-        client_user_id: userId,
+        client_user_id: session.user.id,
       },
       client_name: 'Financial Freedom',
       products: PLAID_PRODUCTS,

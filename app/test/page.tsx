@@ -1,5 +1,21 @@
 'use server';
 
+import { authOptions } from '@/lib/next-auth';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+
 export default async function TestPage() {
-  return <div>Test Page!</div>;
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return redirect('/welcome');
+  }
+
+  return (
+    <Container>
+      <Stack>TODO</Stack>
+    </Container>
+  );
 }
