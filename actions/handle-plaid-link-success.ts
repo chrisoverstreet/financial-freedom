@@ -1,6 +1,6 @@
 'use server';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 import plaid from '@/lib/plaid';
 import prisma from '@/lib/prisma';
 import {

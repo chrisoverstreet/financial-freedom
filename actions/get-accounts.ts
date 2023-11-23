@@ -1,7 +1,7 @@
 'use server';
 
 import { Prisma } from '.prisma/client';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { cache } from 'react';

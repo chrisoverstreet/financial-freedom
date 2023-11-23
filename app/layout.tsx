@@ -1,10 +1,10 @@
 'use server';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import Header from '@/components/Header';
 import SessionProvider from '@/components/SessionProvider';
 import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry';
 import { PlaidProvider } from '@/contexts/PlaidContext';
+import { authOptions } from '@/lib/next-auth';
 import Box from '@mui/material/Box';
 import { getServerSession } from 'next-auth';
 import type { ReactNode } from 'react';

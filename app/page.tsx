@@ -1,8 +1,8 @@
 'use server';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import AccountsList from '@/components/AccountsList';
 import AddAccountButton from '@/components/AddAccountButton';
+import { authOptions } from '@/lib/next-auth';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import { getServerSession } from 'next-auth';
