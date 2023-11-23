@@ -10,7 +10,7 @@ export default function AddAccountButton() {
   const [linkToken, setLinkToken] = useState<string | null>(null);
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(async (publicToken) => {
-    handlePlaidLinkSuccess(publicToken).then(console.log).catch(console.error);
+    await handlePlaidLinkSuccess(publicToken);
   }, []);
 
   const { open, ready } = usePlaidLink({ token: linkToken, onSuccess });
@@ -24,9 +24,10 @@ export default function AddAccountButton() {
   return <Button onClick={onClick}>Add Account</Button>;
 
   function onClick() {
-    getPlaidLinkToken().then((token) => {
-      console.log(token);
-      setLinkToken(token);
-    });
+    if (!linkToken) {
+      getPlaidLinkToken().then(setLinkToken);
+    } else {
+      open();
+    }
   }
 }

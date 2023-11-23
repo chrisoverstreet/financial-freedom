@@ -55,15 +55,14 @@ model VerificationToken {
 }
 
 model PlaidBalance {
-  id                     String       @id @default(cuid())
-  accountId              String       @map(name: "account_id")
-  Account                PlaidAccount @relation(fields: [accountId], references: [accountId])
+  id                     String         @id @default(cuid())
   available              Float?
   current                Float?
   limit                  Float?
-  isoCurrencyCode        String?      @map(name: "iso_currency_code")
-  unofficialCurrencyCode String?      @map(name: "unofficial_currency_code")
-  lastUpdatedDatetime    DateTime?    @map(name: "last_updated_datetime")
+  isoCurrencyCode        String?        @map(name: "iso_currency_code")
+  unofficialCurrencyCode String?        @map(name: "unofficial_currency_code")
+  lastUpdatedDatetime    DateTime?      @map(name: "last_updated_datetime")
+  PlaidAccount           PlaidAccount[]
 
   @@map(name: "plaid_balance")
 }
@@ -93,7 +92,8 @@ enum PlaidVerificationStatus {
 
 model PlaidAccount {
   accountId           String                   @id @map(name: "account_id")
-  Balances            PlaidBalance[]
+  balanceId           String
+  Balance             PlaidBalance             @relation(fields: [balanceId], references: [id])
   mask                String?
   name                String
   officialName        String?                  @map(name: "official_name")
@@ -102,6 +102,8 @@ model PlaidAccount {
   verificationStatus  PlaidVerificationStatus? @map(name: "verification_status")
   persistentAccountId String?                  @map(name: "persistent_account_id")
   Transactions        PlaidTransaction[]
+  itemId              String                   @map(name: "item_id")
+  Item                PlaidItem                @relation(fields: [itemId], references: [itemId])
 
   @@map(name: "plaid_account")
 }
@@ -119,6 +121,7 @@ model PlaidItem {
   updateType            String         @map(name: "update_type")
   User                  User?          @relation(fields: [userId], references: [id])
   userId                String?        @map(name: "user_id")
+  Accounts              PlaidAccount[]
 
   @@map(name: "plaid_item")
 }

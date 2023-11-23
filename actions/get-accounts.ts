@@ -1,17 +1,26 @@
 'use server';
 
 import { Prisma } from '.prisma/client';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 import { cache } from 'react';
 import SortOrder = Prisma.SortOrder;
 
 const getAccounts = cache(async () => {
+  const session = await getServerSession(authOptions);
+
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error('Not signed in');
+  }
+
   return prisma.plaidAccount.findMany({
     select: {
       accountId: true,
       name: true,
       type: true,
-      Balances: {
+      Balance: {
         select: {
           available: true,
           limit: true,
@@ -27,6 +36,12 @@ const getAccounts = cache(async () => {
     orderBy: {
       name: SortOrder.asc,
     },
+    where: {
+      Item: {
+        userId,
+      },
+    },
+    take: Math.floor(Math.random() * (4 - 1) + 1),
   });
 });
 

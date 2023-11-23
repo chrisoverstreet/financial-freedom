@@ -59,7 +59,6 @@ CREATE TABLE "VerificationToken" (
 -- CreateTable
 CREATE TABLE "plaid_balance" (
     "id" TEXT NOT NULL,
-    "account_id" TEXT NOT NULL,
     "available" DOUBLE PRECISION,
     "current" DOUBLE PRECISION,
     "limit" DOUBLE PRECISION,
@@ -73,6 +72,7 @@ CREATE TABLE "plaid_balance" (
 -- CreateTable
 CREATE TABLE "plaid_account" (
     "account_id" TEXT NOT NULL,
+    "balanceId" TEXT NOT NULL,
     "mask" TEXT,
     "name" TEXT NOT NULL,
     "official_name" TEXT,
@@ -80,6 +80,7 @@ CREATE TABLE "plaid_account" (
     "subtype" TEXT,
     "verification_status" "plaid_verification_status",
     "persistent_account_id" TEXT,
+    "item_id" TEXT NOT NULL,
 
     CONSTRAINT "plaid_account_pkey" PRIMARY KEY ("account_id")
 );
@@ -223,7 +224,10 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "plaid_balance" ADD CONSTRAINT "plaid_balance_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "plaid_account"("account_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "plaid_account" ADD CONSTRAINT "plaid_account_balanceId_fkey" FOREIGN KEY ("balanceId") REFERENCES "plaid_balance"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "plaid_account" ADD CONSTRAINT "plaid_account_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "plaid_item"("item_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "plaid_item" ADD CONSTRAINT "plaid_item_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
