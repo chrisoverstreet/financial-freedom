@@ -1,6 +1,7 @@
 'use server';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import AddAccountButton from '@/components/AddAccountButton';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import { getServerSession } from 'next-auth';
@@ -15,12 +16,9 @@ export default async function HomePage() {
 
   return (
     <Container>
-      <Stack>TODO</Stack>
-      {/*<Stack>*/}
-      {/*  <Suspense>*/}
-      {/*    <AccountsList />*/}
-      {/*  </Suspense>*/}
-      {/*</Stack>*/}
+      <Stack>
+        <AddAccountButton />
+      </Stack>
     </Container>
   );
 }

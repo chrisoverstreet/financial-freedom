@@ -1,6 +1,6 @@
 'use server';
 
-import getUserIdOrThrow from '@/actions/get-user-id';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import plaid from '@/lib/plaid';
 import prisma from '@/lib/prisma';
 import {
@@ -8,11 +8,17 @@ import {
   PlaidProduct,
   PlaidVerificationStatus,
 } from '@prisma/client';
+import { getServerSession } from 'next-auth';
 import { CountryCode } from 'plaid';
 import { z } from 'zod';
 
 export async function handlePlaidLinkSuccess(publicToken: string) {
-  const userId = await getUserIdOrThrow();
+  const session = await getServerSession(authOptions);
+
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error('Not signed in');
+  }
 
   const {
     data: { access_token: accessToken, item_id: itemId },
