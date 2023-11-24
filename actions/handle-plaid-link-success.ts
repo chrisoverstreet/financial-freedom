@@ -101,6 +101,7 @@ export async function handlePlaidLinkSuccess(publicToken: string) {
           .optional()
           .parse(itemData.item.consented_products),
         updateType: itemData.item.update_type,
+        accessToken,
         consentExpirationTime: itemData.item.consent_expiration_time,
       },
     });

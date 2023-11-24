@@ -109,19 +109,22 @@ model PlaidAccount {
 }
 
 model PlaidItem {
-  itemId                String         @id @map(name: "item_id")
-  institutionId         String?        @map(name: "institution_id")
-  webhook               String?
-  errorId               String?
-  availableProducts     PlaidProduct[] @map(name: "available_products")
-  billedProducts        PlaidProduct[] @map(name: "billed_products")
-  products              PlaidProduct[]
-  consentedProducts     PlaidProduct[] @map(name: "consented_products")
-  consentExpirationTime DateTime?      @map(name: "consent_expiration_time")
-  updateType            String         @map(name: "update_type")
-  User                  User?          @relation(fields: [userId], references: [id])
-  userId                String?        @map(name: "user_id")
-  Accounts              PlaidAccount[]
+  itemId                 String         @id @map(name: "item_id")
+  institutionId          String?        @map(name: "institution_id")
+  webhook                String?
+  errorId                String?
+  availableProducts      PlaidProduct[] @map(name: "available_products")
+  billedProducts         PlaidProduct[] @map(name: "billed_products")
+  products               PlaidProduct[]
+  consentedProducts      PlaidProduct[] @map(name: "consented_products")
+  consentExpirationTime  DateTime?      @map(name: "consent_expiration_time")
+  updateType             String         @map(name: "update_type")
+  accessToken            String         @unique @map(name: "access_token")
+  transactionsCursor     String?
+  transactionsLastSyncAt DateTime?      @map("transactions_last_sync_at")
+  User                   User?          @relation(fields: [userId], references: [id])
+  userId                 String?        @map(name: "user_id")
+  Accounts               PlaidAccount[]
 
   @@map(name: "plaid_item")
 }
@@ -269,7 +272,7 @@ model PlaidTransaction {
   pending                        Boolean
   pendingTransactionId           String?                       @map(name: "pending_transaction_id")
   personalFinanceCategoryId      String?                       @map(name: "personal_finance_category_id")
-  personalFinanceCategoryIconUrl String                        @map(name: "personal_finance_category_icon_url")
+  personalFinanceCategoryIconUrl String?                       @map(name: "personal_finance_category_icon_url")
   transactionCode                String?                       @map(name: "transaction_code")
   transactionId                  String                        @id @map(name: "transaction_id")
   unofficialCurrencyCode         String?                       @map(name: "unofficial_currency_code")
