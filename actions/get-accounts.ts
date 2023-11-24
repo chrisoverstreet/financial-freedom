@@ -19,6 +19,11 @@ const getAccounts = cache(async () => {
     select: {
       accountId: true,
       itemId: true,
+      Item: {
+        select: {
+          transactionsLastSyncAt: true,
+        },
+      },
       name: true,
       type: true,
       Balance: {

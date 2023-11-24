@@ -6,17 +6,19 @@ import prisma from '@/lib/prisma';
 const PAGE_COUNT = 500;
 
 export async function syncTransactions(itemId: string) {
-  const { accessToken } = await prisma.plaidItem.findFirstOrThrow({
-    select: {
-      accessToken: true,
-      itemId: true,
-    },
-    where: {
-      itemId,
-    },
-  });
+  const { accessToken, transactionsCursor } =
+    await prisma.plaidItem.findFirstOrThrow({
+      select: {
+        accessToken: true,
+        transactionsCursor: true,
+      },
+      where: {
+        itemId,
+      },
+    });
 
-  let cursor: string | undefined;
+  let firstCursor: string | undefined;
+  let cursor = transactionsCursor ?? undefined;
   let hasMore: boolean;
 
   do {
@@ -209,11 +211,15 @@ export async function syncTransactions(itemId: string) {
     }
 
     cursor = res.data.next_cursor;
+    if (!firstCursor) {
+      firstCursor = cursor;
+    }
     hasMore = res.data.has_more;
   } while (hasMore && !!cursor);
 
   await prisma.plaidItem.update({
     data: {
+      transactionsCursor: firstCursor,
       transactionsLastSyncAt: new Date(),
     },
     where: {

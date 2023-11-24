@@ -15,8 +15,11 @@ const getTransactions = cache(async () => {
   return prisma.plaidTransaction.findMany({
     select: {
       transactionId: true,
+      merchantName: true,
+      personalFinanceCategoryIconUrl: true,
       name: true,
-      datetime: true,
+      authorizedDate: true,
+      authorizedDatetime: true,
       amount: true,
       website: true,
       logoUrl: true,

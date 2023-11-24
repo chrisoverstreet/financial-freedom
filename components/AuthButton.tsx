@@ -30,6 +30,9 @@ export default function AuthButton() {
             <IconButton onClick={(e) => setAnchorElUser(e.currentTarget)}>
               <Avatar
                 alt={session.user?.name ?? ''}
+                imgProps={{
+                  referrerPolicy: 'no-referrer',
+                }}
                 src={session.user?.image ?? undefined}
               />
             </IconButton>
@@ -44,14 +47,17 @@ export default function AuthButton() {
             sx={{ mt: '45px' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
-            <Link href='/'>
-              <MenuItem>
+            <Link href='/' style={{ color: 'inherit', textDecoration: 'none' }}>
+              <MenuItem onClick={() => setAnchorElUser(null)}>
                 <Typography>Home</Typography>
               </MenuItem>
             </Link>
-            <Link href='/test'>
-              <MenuItem>
-                <Typography>Test</Typography>
+            <Link
+              href='/transactions'
+              style={{ color: 'inherit', textDecoration: 'none' }}
+            >
+              <MenuItem onClick={() => setAnchorElUser(null)}>
+                <Typography>Transactions</Typography>
               </MenuItem>
             </Link>
             <Divider />
@@ -70,7 +76,10 @@ export default function AuthButton() {
   }
 
   return (
-    <Button color='inherit' onClick={() => signIn()}>
+    <Button
+      color='inherit'
+      onClick={() => signIn('google', { callbackUrl: '/' })}
+    >
       Sign in
     </Button>
   );
