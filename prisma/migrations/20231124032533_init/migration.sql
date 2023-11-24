@@ -97,6 +97,8 @@ CREATE TABLE "plaid_item" (
     "consented_products" "plaid_product"[],
     "consent_expiration_time" TIMESTAMP(3),
     "update_type" TEXT NOT NULL,
+    "access_token" TEXT NOT NULL,
+    "transactions_last_sync_at" TIMESTAMP(3),
     "user_id" TEXT,
 
     CONSTRAINT "plaid_item_pkey" PRIMARY KEY ("item_id")
@@ -193,7 +195,7 @@ CREATE TABLE "plaid_transaction" (
     "pending" BOOLEAN NOT NULL,
     "pending_transaction_id" TEXT,
     "personal_finance_category_id" TEXT,
-    "personal_finance_category_icon_url" TEXT NOT NULL,
+    "personal_finance_category_icon_url" TEXT,
     "transaction_code" TEXT,
     "transaction_id" TEXT NOT NULL,
     "unofficial_currency_code" TEXT,
@@ -216,6 +218,9 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "plaid_item_access_token_key" ON "plaid_item"("access_token");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

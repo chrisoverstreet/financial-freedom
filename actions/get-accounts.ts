@@ -18,6 +18,7 @@ const getAccounts = cache(async () => {
   return prisma.plaidAccount.findMany({
     select: {
       accountId: true,
+      itemId: true,
       name: true,
       type: true,
       Balance: {

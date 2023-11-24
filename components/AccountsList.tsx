@@ -1,7 +1,8 @@
 'use server';
 
 import getAccounts from '@/actions/get-accounts';
-import { List, ListItem, ListItemText } from '@mui/material';
+import { SyncTransactionsButton } from '@/components/SyncTransactionsButton';
+import { List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import currency from 'currency.js';
 
 export default async function AccountsList() {
@@ -19,6 +20,9 @@ export default async function AccountsList() {
           >
             {account.name}
           </ListItemText>
+          <ListItemButton>
+            <SyncTransactionsButton itemId={account.itemId} />
+          </ListItemButton>
         </ListItem>
       ))}
     </List>
