@@ -1,15 +1,14 @@
 'use client';
 
-import { syncTransactions } from '@/actions/sync-transactions';
 import SyncIcon from '@mui/icons-material/Sync';
 import IconButton from '@mui/material/IconButton';
 import { useState } from 'react';
 
 type Props = {
-  itemId: string;
+  sync: Function;
 };
 
-export function SyncTransactionsListItemButton({ itemId }: Props) {
+export function SyncTransactionsListItemButton({ sync }: Props) {
   const [syncing, setSyncing] = useState(false);
 
   return (
@@ -19,6 +18,6 @@ export function SyncTransactionsListItemButton({ itemId }: Props) {
   );
   async function onClick() {
     setSyncing(true);
-    await syncTransactions(itemId).finally(() => setSyncing(false));
+    await sync().finally(() => setSyncing(false));
   }
 }

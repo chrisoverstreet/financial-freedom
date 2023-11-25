@@ -1,6 +1,7 @@
 'use server';
 
 import getAccounts from '@/actions/get-accounts';
+import { syncTransactions } from '@/actions/sync-transactions';
 import { SyncTransactionsListItemButton } from '@/components/SyncTransactionsListItemButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -17,7 +18,9 @@ export default async function AccountsList() {
         <ListItem
           key={account.accountId}
           secondaryAction={
-            <SyncTransactionsListItemButton itemId={account.itemId} />
+            <SyncTransactionsListItemButton
+              sync={syncTransactions.bind(account.itemId)}
+            />
           }
         >
           <ListItemText

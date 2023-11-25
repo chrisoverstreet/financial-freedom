@@ -8,7 +8,12 @@ import { z } from 'zod';
 
 const PLAID_PRODUCTS = z
   .array(z.nativeEnum(Products))
-  .parse((process.env.PLAID_PRODUCTS || Products.Transactions).split(','));
+  .parse(
+    (
+      process.env.PLAID_PRODUCTS ||
+      `${Products.Transactions},${Products.Investments},${Products.Auth}`
+    ).split(','),
+  );
 const PLAID_COUNTRY_CODES = z
   .array(z.nativeEnum(CountryCode))
   .parse((process.env.PLAID_COUNTRY_CODES || 'US').split(','));

@@ -2,6 +2,7 @@
 
 import plaid from '@/lib/plaid';
 import prisma from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 const PAGE_COUNT = 500;
 
@@ -226,4 +227,6 @@ export async function syncTransactions(itemId: string) {
       accessToken,
     },
   });
+
+  revalidatePath('/');
 }
